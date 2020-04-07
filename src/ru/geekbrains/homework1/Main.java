@@ -69,4 +69,4 @@ public class Main {
             System.out.println("Год " + year + " является високосным");
         else System.out.println("Год " + year + " не является високосным");
     }
-} 
+}
