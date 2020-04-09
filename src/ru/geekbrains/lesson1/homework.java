@@ -1,6 +1,6 @@
-package ru.geekbrains.homework1;
+package ru.geekbrains.lesson1;
 
-public class Main {
+public class homework {
 
     public static void main(String[] args) {
 
