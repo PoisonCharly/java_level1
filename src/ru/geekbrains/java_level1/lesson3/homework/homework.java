@@ -18,8 +18,8 @@ public class homework {
 
     // init field
     private static void initMap() {
-        fieldSizeY = 3;
-        fieldSizeX = 3;
+        fieldSizeY = 5;
+        fieldSizeX = 5;
         field = new char[fieldSizeY][fieldSizeX];
         for (int y = 0; y < fieldSizeY; y++) {
             for (int x = 0; x < fieldSizeX; x++) {
@@ -62,32 +62,65 @@ public class homework {
         return x >= 0 && x < fieldSizeX && y >= 0 && y < fieldSizeY;
     }
 
+    // check player's possibility to win
+    private static boolean possibilityToWin(char player){
+        for(int i = 0; i < fieldSizeY; i++)
+            for(int j = 0; j < fieldSizeX; j++){
+                if(isEmptyCell(i,j)) {
+                    field[i][j] = player;
+                    if (checkWin(player)) {
+                        field[i][j] = AI_DOT;
+                        return true;
+                    } else field[i][j] = EMPTY_DOT;
+                }
+            }
+        return false;
+    }
+
     // ai turn
     private static void aiTurn() {
         int x;
         int y;
-        do {
-            x = RANDOM.nextInt(fieldSizeX);
-            y = RANDOM.nextInt(fieldSizeY);
-        } while (!isEmptyCell(y, x));
-        field[y][x] = AI_DOT;
+
+        if (!(possibilityToWin(AI_DOT))) //в первую очередь проверить, может ли ИИ победить сейчас
+            if (!(possibilityToWin(HUMAN_DOT))) { //и только потом -- человек
+                do { //иначе ставим точку рандомно
+                    x = RANDOM.nextInt(fieldSizeX);
+                    y = RANDOM.nextInt(fieldSizeY);
+                } while (!isEmptyCell(y, x));
+                field[y][x] = AI_DOT;
+            }
+    }
+    /*
+    Переделать проверку победы, чтобы она не была реализована просто набором условий.
+    Попробовать переписать логику проверки победы, чтобы она работала для поля 5х5 и количества фишек 4.
+    */
+    //check line
+    private static boolean checkLine(int y, int x, int coifY, int coifX, char c){
+        int victoryCriterion = 4; //сколько нужно символов подряд чтобы выиграть
+        int wayX = x + (victoryCriterion - 1) * coifX;
+        int wayY = y + (victoryCriterion - 1) * coifY;
+
+        if (wayX < 0 || wayY < 0 || wayX > fieldSizeX - 1 || wayY > fieldSizeY - 1) return false;
+
+        for (int i = 0; i < victoryCriterion; i++) {
+            int checkY = y + i * coifY;
+            int checkX = x + i * coifX;
+            if (field[checkY][checkX] != c) return false;
+        }
+        return true;
     }
 
     // check win
     private static boolean checkWin(char c) {
-        // hor
-        if (field[0][0] == c && field[0][1] == c && field[0][2] == c) return true;
-        if (field[1][0] == c && field[1][1] == c && field[1][2] == c) return true;
-        if (field[2][0] == c && field[2][1] == c && field[2][2] == c) return true;
-
-        //ver
-        if (field[0][0] == c && field[1][0] == c && field[2][0] == c) return true;
-        if (field[0][1] == c && field[1][1] == c && field[2][1] == c) return true;
-        if (field[0][2] == c && field[1][2] == c && field[2][2] == c) return true;
-
-        //dia
-        if (field[0][0] == c && field[1][1] == c && field[2][2] == c) return true;
-        if (field[0][2] == c && field[1][1] == c && field[2][0] == c) return true;
+        for (int i = 0; i < fieldSizeY; i++) {
+            for (int j = 0; j < fieldSizeX; j++) {
+                if (checkLine(i, j, 0, 1, c)) return true; // горизонталь
+                if (checkLine(i, j, 1, 1, c)) return true; // диагональ х у
+                if (checkLine(i, j, 1, 0, c)) return true; // вертикаль
+                if (checkLine(i, j, -1, 1, c)) return true; // диагональ х -у
+            }
+        }
         return false;
     }
 
